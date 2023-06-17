@@ -6,7 +6,7 @@ services:
       - POSTGRES_USER=example
       - POSTGRES_PASSWORD=example
       - POSTGRES_DB=example
-  api:
+  api1:
     build: 
       context: .
       dockerfile: Dockerfile
@@ -19,4 +19,37 @@ services:
       - postgres
     entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
     command: ["/app/api"]
-    restart: always
+  api2:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8001:8000
+    environment:
+      - postgres=${postgres}
+      - DB_URL=postgresql://${m_db_username}:${m_db_password}@postgres:5432/${m_db_dbname}?sslmode=disable
+    depends_on:
+      - postgres
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/api"]
+  api3:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8002:8000
+    environment:
+      - postgres=${postgres}
+      - DB_URL=postgresql://${m_db_username}:${m_db_password}@postgres:5432/${m_db_dbname}?sslmode=disable
+    depends_on:
+      - postgres
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/api"]
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - api1
+      - api2
+      - api3
