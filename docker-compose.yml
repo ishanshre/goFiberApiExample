@@ -3,4 +3,20 @@ services:
   postgres:
     image: postgres:latest
     environment:
-      - name=value
+      - POSTGRES_USER=example
+      - POSTGRES_PASSWORD=example
+      - POSTGRES_DB=example
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    environment:
+      - postgres=${postgres}
+      - DB_URL=postgresql://${m_db_username}:${m_db_password}@postgres:5432/${m_db_dbname}?sslmode=disable
+    depends_on:
+      - postgres
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/api"]
+    restart: always
