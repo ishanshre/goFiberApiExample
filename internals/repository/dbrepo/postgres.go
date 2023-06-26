@@ -43,3 +43,50 @@ func (m *postgresDBRepo) InsertProduct(p *models.Product) error {
 	}
 	return nil
 }
+
+func (m *postgresDBRepo) DeleteProduct(p *models.Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	stmt := `DELETE FROM products WHERE id=$1`
+	_, err := m.DB.ExecContext(ctx, stmt, p.ID)
+	return err
+}
+
+func (m *postgresDBRepo) UpdateProduct(p *models.Product) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	stmt := `
+		UPDATE products
+		SET name = $2, body = $3, stock = $4, updated_at = $5
+		where id = $1
+	`
+	_, err := m.DB.ExecContext(
+		ctx,
+		stmt,
+		p.ID,
+		p.Name,
+		p.Body,
+		p.Stock,
+		p.UpdatedAt,
+	)
+	return err
+}
+
+func (m *postgresDBRepo) GetProductByID(id int) (*models.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	query := `SELECT * FROM products WHERE id=$1`
+	row := m.DB.QueryRowContext(ctx, query, id)
+	p := &models.Product{}
+	if err := row.Scan(
+		&p.ID,
+		&p.Name,
+		&p.Body,
+		&p.Stock,
+		&p.CreatedAt,
+		&p.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return p, nil
+}

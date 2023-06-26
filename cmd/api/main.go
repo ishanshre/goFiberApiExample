@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/ishanshre/goFiberApiExample/internals/config"
+	"github.com/ishanshre/goFiberApiExample/internals/router"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/ishanshre/goFiberApiExample/internals/driver"
@@ -31,7 +32,7 @@ func main() {
 
 	app := fiber.New()
 
-	Router(&global, app)
+	router.Router(&global, app)
 
 	app.Listen(port)
 }
