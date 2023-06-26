@@ -61,3 +61,50 @@ func (m *Repository) InsertProduct(ctx *fiber.Ctx) error {
 		"message": "Data inserted successfully",
 	})
 }
+
+func (m *Repository) DeleteProduct(ctx *fiber.Ctx) error {
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		return err
+	}
+	p := &models.Product{ID: id}
+	if err := m.DB.DeleteProduct(p); err != nil {
+		return err
+	}
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Product successfully deleted",
+	})
+}
+
+func (m *Repository) UpdateProduct(ctx *fiber.Ctx) error {
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		return err
+	}
+	var p *models.Product
+	if err := ctx.BodyParser(&p); err != nil {
+		return err
+	}
+	p.ID = id
+	p.UpdatedAt = time.Now()
+	if err := m.DB.UpdateProduct(p); err != nil {
+		return err
+	}
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{
+		"success": "success",
+		"message": "Product updated",
+	})
+}
+
+func (m *Repository) GetProductByID(ctx *fiber.Ctx) error {
+	id, err := ctx.ParamsInt("id")
+	if err != nil {
+		return err
+	}
+	p, err := m.DB.GetProductByID(id)
+	if err != nil {
+		return err
+	}
+	return ctx.Status(http.StatusOK).JSON(p)
+}
